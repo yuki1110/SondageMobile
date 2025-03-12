@@ -1,43 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@color/colorBackground">
 
+    <!-- Titre du sondage -->
     <TextView
         android:id="@+id/titreSondage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:textStyle="bold"/>
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/textColorPrimary"
+        android:paddingBottom="4dp"/>
 
+    <!-- Description du sondage -->
     <TextView
         android:id="@+id/descriptionSondage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="16sp"
-        android:paddingTop="8dp"/>
+        android:textColor="@color/textColorSecondary"
+        android:paddingBottom="12dp"/>
 
-    <EditText
-        android:id="@+id/reponseInput"
+    <!-- Champ de réponse avec TextInputLayout -->
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.Askly.TextInputLayout"
+        android:id="@+id/textInputLayoutReponse"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Votre réponse"
-        android:padding="8dp"
-        android:background="@android:drawable/editbox_background"/>
+        android:hint="@string/your_answer_hint">
 
-    <Button
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/reponseInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Bouton Envoyer -->
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/envoyerReponseButton"
+        style="@style/Widget.Askly.Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Envoyer la réponse"
+        android:text="@string/envoyer_reponse"
         android:layout_marginTop="16dp"/>
 
+    <!-- Barre de progression au centre -->
     <ProgressBar
         android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:visibility="gone"
+        android:layout_marginTop="16dp"
         android:layout_gravity="center"/>
+
+    <!-- Petit espace visuel en bas (optionnel) -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 </LinearLayout>

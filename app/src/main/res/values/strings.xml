@@ -1,3 +1,19 @@
 <resources>
-    <string name="app_name">Projet0406</string>
+    <string name="app_name">Askly</string>
+    <string name ="splash_logo">Askly</string>
+    <string name ="hint_password">Mot de passe</string>
+    <string name ="login_title">Compte</string>
+    <string name ="hint_email">Adresse email</string>
+    <string name ="action_login">Se connecter</string>
+    <string name="your_answer_hint">Votre réponse</string>
+    <string name="envoyer_reponse">Envoyer la réponse</string>
+    <string name="deconnexion">Déconnexion</string>
+    <string name="liste_sondages">Liste des Sondages</string>
+    <string name="titre_sondage_exemple">Titre du sondage</string>
+    <string name="description_sondage_exemple">Description du sondage...</string>
+    <string name="navigation_drawer_open">Ouvrir le menu</string>
+    <string name="navigation_drawer_close">Fermer le menu</string>
+    <string name="parametres">Paramètres</string>
+    <string name="parametres_askly">Paramètres Askly</string>
+    <string name="mode_sombre">Mode Sombre</string>
 </resources>

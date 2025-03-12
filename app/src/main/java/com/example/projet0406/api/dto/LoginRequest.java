@@ -1,4 +1,4 @@
-package com.example.projet0406.api;
+package com.example.projet0406.api.dto;
 
 public class LoginRequest {
     private String email;

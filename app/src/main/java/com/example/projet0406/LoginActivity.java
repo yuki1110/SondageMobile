@@ -8,9 +8,9 @@ import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.projet0406.api.ApiService;
-import com.example.projet0406.api.LoginRequest;
+import com.example.projet0406.api.dto.LoginRequest;
 import com.example.projet0406.api.RetrofitClient;
-import com.example.projet0406.api.UserResponse;
+import com.example.projet0406.models.UserResponse;
 import com.example.projet0406.storage.SharedPrefManager;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -26,9 +26,9 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        emailEditText = findViewById(R.id.emailEditText);
-        passwordEditText = findViewById(R.id.passwordEditText);
-        loginButton = findViewById(R.id.loginButton);
+        emailEditText = findViewById(R.id.inputEmail);
+        passwordEditText = findViewById(R.id.inputPassword);
+        loginButton = findViewById(R.id.buttonLogin);
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -56,7 +56,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     UserResponse user = response.body();
-                    SharedPrefManager.getInstance(LoginActivity.this).saveUser(user.getSondeurId(), user.getToken());
+                    SharedPrefManager.getInstance(LoginActivity.this).saveUser(user.getIdUser(), user.getToken());
                     Toast.makeText(LoginActivity.this, "Connexion réussie", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(LoginActivity.this, SondeurActivity.class));
                     finish();
@@ -64,7 +64,6 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(LoginActivity.this, "Identifiants incorrects", Toast.LENGTH_SHORT).show();
                 }
             }
-
             @Override
             public void onFailure(Call<UserResponse> call, Throwable t) {
                 Toast.makeText(LoginActivity.this, "Erreur : " + t.getMessage(), Toast.LENGTH_SHORT).show();

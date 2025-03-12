@@ -4,7 +4,9 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
-    private static final String BASE_URL = "https://tmp.com/"; //Mettre l'adresse de l'api du projet
+
+    private static final String BASE_URL = "http://10.11.14.133";
+
     private static RetrofitClient instance;
     private final ApiService api;
 
@@ -13,6 +15,7 @@ public class RetrofitClient {
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
+
         api = retrofit.create(ApiService.class);
     }
 

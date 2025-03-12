@@ -12,8 +12,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.projet0406.api.ApiService;
 import com.example.projet0406.api.RetrofitClient;
-import com.example.projet0406.models.ResponseRequest;
+import com.example.projet0406.api.dto.ResponseRequest;
+import com.example.projet0406.room.AnswerEntity;
+import com.example.projet0406.room.AsklyDatabase;
+import com.example.projet0406.room.DatabaseClient;
 import com.example.projet0406.storage.SharedPrefManager;
+
+import java.util.Collections;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -38,6 +43,7 @@ public class RepondreSondageActivity extends AppCompatActivity {
         envoyerReponseButton = findViewById(R.id.envoyerReponseButton);
         progressBar = findViewById(R.id.progressBar);
 
+        // Récupère les infos du sondage sélectionné
         sondageId = getIntent().getIntExtra("sondage_id", -1);
         String titre = getIntent().getStringExtra("sondage_titre");
         String description = getIntent().getStringExtra("sondage_description");
@@ -55,14 +61,22 @@ public class RepondreSondageActivity extends AppCompatActivity {
             return;
         }
 
-        progressBar.setVisibility(View.VISIBLE);
-
-        int sondeurId = SharedPrefManager.getInstance(this).getSondeurId();
+        int userId = SharedPrefManager.getInstance(this).getIdUser();
         ApiService apiService = RetrofitClient.getInstance().getApi();
 
-        ResponseRequest request = new ResponseRequest(sondeurId, sondageId, reponse);
-        Call<Void> call = apiService.envoyerReponse(request);
+        // On crée l'entité locale
+        AnswerEntity answerEntity = new AnswerEntity(userId, sondageId, reponse, false);
 
+        // Prépare la requête : liste de réponses avec un seul élément
+        ResponseRequest request = new ResponseRequest(
+                userId,
+                sondageId,
+                Collections.singletonList(reponse)
+        );
+
+        progressBar.setVisibility(View.VISIBLE);
+
+        Call<Void> call = apiService.envoyerReponse(request);
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
@@ -71,15 +85,25 @@ public class RepondreSondageActivity extends AppCompatActivity {
                     Toast.makeText(RepondreSondageActivity.this, "Réponse envoyée", Toast.LENGTH_SHORT).show();
                     finish();
                 } else {
-                    Toast.makeText(RepondreSondageActivity.this, "Échec de l'envoi", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RepondreSondageActivity.this, "Échec de l'envoi, stocké hors-ligne", Toast.LENGTH_SHORT).show();
+                    stockerHorsLigne(answerEntity);
                 }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
-                Toast.makeText(RepondreSondageActivity.this, "Erreur de connexion", Toast.LENGTH_SHORT).show();
+                Toast.makeText(RepondreSondageActivity.this, "Pas de réseau, réponse stockée", Toast.LENGTH_SHORT).show();
+                stockerHorsLigne(answerEntity);
             }
         });
+    }
+
+    private void stockerHorsLigne(AnswerEntity answerEntity) {
+        new Thread(() -> {
+            AsklyDatabase db = DatabaseClient.getInstance(RepondreSondageActivity.this);
+            db.answerDao().insertAnswer(answerEntity);
+        }).start();
+        finish();
     }
 }

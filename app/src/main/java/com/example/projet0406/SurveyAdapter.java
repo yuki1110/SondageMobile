@@ -1,11 +1,10 @@
 package com.example.projet0406;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.content.Intent;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -35,9 +34,10 @@ public class SurveyAdapter extends RecyclerView.Adapter<SurveyAdapter.SurveyView
         holder.titleTextView.setText(survey.getTitle());
         holder.descriptionTextView.setText(survey.getDescription());
 
+        // Ouvrir RepondreSondageActivity quand on clique sur un item
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(v.getContext(), RepondreSondageActivity.class);
-            intent.putExtra("sondage_id", survey.getId());
+            intent.putExtra("sondage_id", survey.getIdSurvey());
             intent.putExtra("sondage_titre", survey.getTitle());
             intent.putExtra("sondage_description", survey.getDescription());
             v.getContext().startActivity(intent);

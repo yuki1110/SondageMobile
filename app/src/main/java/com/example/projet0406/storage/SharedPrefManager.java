@@ -1,18 +1,21 @@
 package com.example.projet0406.storage;
+
 import android.content.Context;
 import android.content.SharedPreferences;
-import com.example.projet0406.api.UserResponse;
+
+import com.example.projet0406.models.UserResponse;
 
 public class SharedPrefManager {
-    private static final String SHARED_PREF_NAME = "sondeur_pref";
-    private static final String KEY_TOKEN = "key_token";
-    private static final String KEY_SONDEUR_ID = "key_sondeur_id";
+    private static final String SHARED_PREF_NAME = "app_prefs";
+    private static final String KEY_USER_ID = "id_user";
+    private static final String KEY_ROLE_ID = "id_role";
+    private static final String KEY_TOKEN = "token";
 
     private static SharedPrefManager instance;
-    private Context ctx;
+    private SharedPreferences sharedPreferences;
 
     private SharedPrefManager(Context context) {
-        ctx = context;
+        sharedPreferences = context.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
     }
 
     public static synchronized SharedPrefManager getInstance(Context context) {
@@ -22,31 +25,26 @@ public class SharedPrefManager {
         return instance;
     }
 
-    public void saveUser(int sondeurId, String token) {
-        SharedPreferences sharedPreferences = ctx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+    public void saveUser(int idUser, String token) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt("key_sondeur_id", sondeurId);
-        editor.putString("key_token", token);
+        editor.putInt(KEY_USER_ID, idUser);
+        editor.putString(KEY_TOKEN, token);
         editor.apply();
     }
 
-    public String getToken() {
-        SharedPreferences sharedPreferences = ctx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        return sharedPreferences.getString(KEY_TOKEN, null);
-    }
-
-    public int getSondeurId() {
-        SharedPreferences sharedPreferences = ctx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        return sharedPreferences.getInt(KEY_SONDEUR_ID, -1);
-    }
-
     public boolean isLoggedIn() {
-        SharedPreferences sharedPreferences = ctx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        return sharedPreferences.getString(KEY_TOKEN, null) != null;
+        return sharedPreferences.contains(KEY_USER_ID);
+    }
+
+    public int getIdUser() {
+        return sharedPreferences.getInt(KEY_USER_ID, -1);
+    }
+
+    public int getIdRole() {
+        return sharedPreferences.getInt(KEY_ROLE_ID, -1);
     }
 
     public void clear() {
-        SharedPreferences sharedPreferences = ctx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.clear();
         editor.apply();
