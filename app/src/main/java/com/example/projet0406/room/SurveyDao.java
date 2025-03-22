@@ -14,6 +14,6 @@ public interface SurveyDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<SurveyEntity> surveys);
 
-    @Query("SELECT * FROM survey_cache")
+    @Query("SELECT * FROM SurveyEntity")
     LiveData<List<SurveyEntity>> getAllSurveys();
 }

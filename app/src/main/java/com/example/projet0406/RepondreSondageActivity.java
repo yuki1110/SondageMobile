@@ -62,7 +62,7 @@ public class RepondreSondageActivity extends AppCompatActivity {
         }
 
         int userId = SharedPrefManager.getInstance(this).getIdUser();
-        ApiService apiService = RetrofitClient.getInstance().getApi();
+        ApiService apiService = RetrofitClient.getInstance(this).getApi();
 
         // On crée l'entité locale
         AnswerEntity answerEntity = new AnswerEntity(userId, sondageId, reponse, false);
@@ -76,7 +76,7 @@ public class RepondreSondageActivity extends AppCompatActivity {
 
         progressBar.setVisibility(View.VISIBLE);
 
-        Call<Void> call = apiService.envoyerReponse(request);
+        Call<Void> call = apiService.envoyerReponse(sondageId, request);
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {

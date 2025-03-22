@@ -10,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -33,23 +34,22 @@ import java.util.List;
 
 public class SondeurActivity extends AppCompatActivity {
 
-    private RecyclerView recyclerView; // liste sondages
-    private ProgressBar progressBar; // barre chargement
+    private RecyclerView recyclerView;
+    private ProgressBar progressBar;
     private SurveyAdapter surveyAdapter;
-    private final List<Survey> surveyList = new ArrayList<>(); // sondages affichés
-    private List<SurveyEntity> oldCacheList; // ancienne liste
+    private final List<Survey> surveyList = new ArrayList<>();
+    private List<SurveyEntity> oldCacheList;
     private SurveyRepository surveyRepository;
-    private MaterialToolbar toolbar; // barre d'action
-    private DrawerLayout drawerLayout; // conteneur hamburger
-    private NavigationView navView; // menu latéral
-    private static final String CHANNEL_ID = "askly_channel_id"; // notif
+    private MaterialToolbar toolbar;
+    private DrawerLayout drawerLayout;
+    private NavigationView navView;
+    private static final String CHANNEL_ID = "askly_channel_id";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sondeur);
 
-        // vérif login
         if (!SharedPrefManager.getInstance(this).isLoggedIn()) {
             Intent intent = new Intent(this, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -58,16 +58,13 @@ public class SondeurActivity extends AppCompatActivity {
             return;
         }
 
-        // notif
         createNotificationChannel();
 
-        // init vue
         drawerLayout = findViewById(R.id.drawerLayout);
         navView = findViewById(R.id.navView);
         toolbar = findViewById(R.id.sondeurToolbar);
         setSupportActionBar(toolbar);
 
-        // hamburger
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this,
                 drawerLayout,
@@ -78,7 +75,6 @@ public class SondeurActivity extends AppCompatActivity {
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        // clic nav
         navView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
             if (id == R.id.nav_settings) {
@@ -94,14 +90,12 @@ public class SondeurActivity extends AppCompatActivity {
             return false;
         });
 
-        // autres vues
         progressBar = findViewById(R.id.progressBar);
         recyclerView = findViewById(R.id.recyclerView);
         surveyAdapter = new SurveyAdapter(surveyList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(surveyAdapter);
 
-        // repo + observer
         surveyRepository = new SurveyRepository(this);
         surveyRepository.getAllSurveysFromLocal().observe(this, newList -> {
             int nbNouveaux = detecterNouveauxSondages(newList, oldCacheList);
@@ -118,7 +112,6 @@ public class SondeurActivity extends AppCompatActivity {
             oldCacheList = newList;
         });
 
-        // appel API
         chargerSondages();
     }
 
@@ -138,7 +131,7 @@ public class SondeurActivity extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
         int sondeurId = SharedPrefManager.getInstance(this).getIdUser();
         surveyRepository.fetchSurveysFromApiAndStore(sondeurId, "en_cours");
-        progressBar.postDelayed(() -> progressBar.setVisibility(View.GONE), 1500);
+        progressBar.setVisibility(View.GONE);
     }
 
     private int detecterNouveauxSondages(List<SurveyEntity> newList, List<SurveyEntity> oldList) {

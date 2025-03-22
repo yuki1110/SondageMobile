@@ -12,6 +12,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
 import retrofit2.http.GET;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface ApiService {
@@ -28,7 +29,6 @@ public interface ApiService {
             @Query("status") String status
     );
 
-    @POST("reponses")
-    Call<Void> envoyerReponse(@Body ResponseRequest request);
-
+    @POST("sondeur/sondage/{id}/repondre")
+    Call<Void> envoyerReponse(@Path("id") int sondageId, @Body ResponseRequest body);
 }

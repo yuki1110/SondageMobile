@@ -3,6 +3,7 @@ package com.example.projet0406.repository;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 
 import com.example.projet0406.api.ApiService;
@@ -29,8 +30,7 @@ public class SurveyRepository {
         surveyDao = DatabaseClient.getInstance(context).surveyDao();
 
         // Récupération de l'API
-        apiService = RetrofitClient.getInstance().getApi();
-    }
+        apiService = RetrofitClient.getInstance(context).getApi();}
 
     /**
      * Retourne la liste des sondages stockés localement (Room)
@@ -47,15 +47,33 @@ public class SurveyRepository {
     public void fetchSurveysFromApiAndStore(int sondeurId, String status) {
         apiService.getSondages(sondeurId, status).enqueue(new Callback<List<Survey>>() {
             @Override
-            public void onResponse(Call<List<Survey>> call, Response<List<Survey>> response) {
+            public void onResponse(@NonNull Call<List<Survey>> call, @NonNull Response<List<Survey>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Survey> surveys = response.body();
+                    storeSurveys(surveys);
                 } else {
+                    Log.e("SurveyRepository", "Erreur lors de la récupération des sondages");
                 }
             }
+
             @Override
-            public void onFailure(Call<List<Survey>> call, Throwable t) {
+            public void onFailure(@NonNull Call<List<Survey>> call, @NonNull Throwable t) {
+                Log.e("SurveyRepository", "Échec de la connexion au serveur", t);
             }
         });
+    }
+
+    public void storeSurveys(List<Survey> surveys) {
+        // Stocker les sondages dans la base de données locale
+        // Cette méthode doit être exécutée dans un thread séparé
+        new Thread(() -> {
+            // Conversion et stockage des sondages
+            List<SurveyEntity> surveyEntities = new ArrayList<>();
+            for (Survey survey : surveys) {
+                SurveyEntity entity = new SurveyEntity(survey.getIdSurvey(), survey.getTitle(), survey.getDescription());
+                surveyEntities.add(entity);
+            }
+            surveyDao.insertAll(surveyEntities);
+        }).start();
     }
 }
