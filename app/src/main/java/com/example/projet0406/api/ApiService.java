@@ -10,6 +10,7 @@ import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
@@ -17,8 +18,12 @@ import retrofit2.http.Query;
 
 public interface ApiService {
 
-    @POST("login")
-    Call<UserResponse> login(@Body LoginRequest request);
+    @Headers({
+            "Accept: application/json",
+            "Content-Type: application/json"
+    })
+    @POST("/api/login")
+    Call<UserResponse> login(@Body LoginRequest loginRequest);
 
     @POST("logout")
     Call<Void> logout();
@@ -26,9 +31,12 @@ public interface ApiService {
     @GET("sondages")
     Call<List<Survey>> getSondages(
             @Query("user_id") int userId,
-            @Query("status") String status
-    );
+            @Query("status") String status);
 
     @POST("sondeur/sondage/{id}/repondre")
     Call<Void> envoyerReponse(@Path("id") int sondageId, @Body ResponseRequest body);
+
+    @GET("api/user/{id}")
+    Call<UserResponse> getUser(@Path("id") int userId);
+
 }

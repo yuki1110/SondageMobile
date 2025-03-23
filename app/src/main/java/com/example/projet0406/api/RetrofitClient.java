@@ -4,55 +4,49 @@ import android.content.Context;
 
 import com.example.projet0406.storage.SharedPrefManager;
 
-import java.util.concurrent.TimeUnit;
-
-import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
 
-    // Exemple : si ton Laravel tourne en local sur 10.0.2.2:8000 (émulateur Android) ou 192.168.x.x
-    // Remplace par l’URL adaptée à ton environnement.
-    private static final String BASE_URL = "http://10.11.14.133/";
+    private static final String BASE_URL = "http://10.11.14.133:8000/";
 
     private static RetrofitClient instance;
-    private final ApiService api;
+    private final Retrofit retrofit;
 
-    private RetrofitClient(Context context) {
+    private RetrofitClient() {
+        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
         OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(chain -> {
-                    Request original = chain.request();
-                    String token = SharedPrefManager.getInstance(context).getToken();
-                    Request modified = original.newBuilder()
-                            .header("Authorization", "Bearer " + token)
-                            .build();
-                    return chain.proceed(modified);
-                })
+                .addInterceptor(loggingInterceptor)
                 .build();
 
-        Retrofit retrofit = new Retrofit.Builder()
+        retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-
-        api = retrofit.create(ApiService.class);
     }
 
-    public static synchronized RetrofitClient getInstance(Context context) {
+    public static synchronized RetrofitClient getInstance() {
         if (instance == null) {
-            instance = new RetrofitClient(context.getApplicationContext());
+            instance = new RetrofitClient();
         }
         return instance;
     }
 
+    public static synchronized RetrofitClient getInstance(Context context) {
+        return getInstance();
+    }
+
     public ApiService getApi() {
-        return api;
+        return retrofit.create(ApiService.class);
+    }
+
+    public ApiService getApiService() {
+        return getApi();
     }
 }
