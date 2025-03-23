@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -98,6 +99,7 @@ public class SondeurActivity extends AppCompatActivity {
 
         surveyRepository = new SurveyRepository(this);
         surveyRepository.getAllSurveysFromLocal().observe(this, newList -> {
+            Log.d("ROOM", "Received " + newList.size() + " surveys from Room");
             int nbNouveaux = detecterNouveauxSondages(newList, oldCacheList);
             surveyList.clear();
             for (SurveyEntity se : newList) {
@@ -110,6 +112,7 @@ public class SondeurActivity extends AppCompatActivity {
             surveyAdapter.notifyDataSetChanged();
             if (nbNouveaux > 0) envoyerNotificationNouveauSondage(nbNouveaux);
             oldCacheList = newList;
+
         });
 
         chargerSondages();
@@ -129,10 +132,13 @@ public class SondeurActivity extends AppCompatActivity {
 
     private void chargerSondages() {
         progressBar.setVisibility(View.VISIBLE);
-        int sondeurId = SharedPrefManager.getInstance(this).getIdUser();
-        surveyRepository.fetchSurveysFromApiAndStore(sondeurId, "en_cours");
+        String token = SharedPrefManager.getInstance(this).getToken();
+        String bearerToken = "Bearer " + token;
+        surveyRepository.fetchSurveysFromApiAndStoreWithToken(bearerToken);
         progressBar.setVisibility(View.GONE);
+        Log.d("DEBUG", "Sondeur Token: " + bearerToken);
     }
+
 
     private int detecterNouveauxSondages(List<SurveyEntity> newList, List<SurveyEntity> oldList) {
         if (oldList == null || oldList.isEmpty()) return (newList == null) ? 0 : newList.size();

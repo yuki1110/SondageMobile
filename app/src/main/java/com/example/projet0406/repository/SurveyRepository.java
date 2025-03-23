@@ -44,21 +44,26 @@ public class SurveyRepository {
      * Fait un appel réseau pour récupérer la liste des sondages,
      * puis stocke le résultat en base (Room).
      */
-    public void fetchSurveysFromApiAndStore(int sondeurId, String status) {
-        apiService.getSondages(sondeurId, status).enqueue(new Callback<List<Survey>>() {
+    public void fetchSurveysFromApiAndStoreWithToken(String bearerToken) {
+        Log.d("ROOM", "➡️ fetchSurveysFromApiAndStore() using token");
+
+        apiService.getSondagesWithToken(bearerToken).enqueue(new Callback<com.example.projet0406.models.SurveyResponse>() {
             @Override
-            public void onResponse(@NonNull Call<List<Survey>> call, @NonNull Response<List<Survey>> response) {
+            public void onResponse(@NonNull Call<com.example.projet0406.models.SurveyResponse> call, @NonNull Response<com.example.projet0406.models.SurveyResponse> response) {
+                Log.d("ROOM", "✅ onResponse - HTTP code: " + response.code());
+
                 if (response.isSuccessful() && response.body() != null) {
-                    List<Survey> surveys = response.body();
+                    List<Survey> surveys = response.body().getSondages();
+                    Log.d("ROOM", "📡 Laravel returned " + surveys.size() + " surveys from API");
                     storeSurveys(surveys);
                 } else {
-                    Log.e("SurveyRepository", "Erreur lors de la récupération des sondages");
+                    Log.e("ROOM", "❌ API responded but body is null or not successful. Code: " + response.code());
                 }
             }
 
             @Override
-            public void onFailure(@NonNull Call<List<Survey>> call, @NonNull Throwable t) {
-                Log.e("SurveyRepository", "Échec de la connexion au serveur", t);
+            public void onFailure(@NonNull Call<com.example.projet0406.models.SurveyResponse> call, @NonNull Throwable t) {
+                Log.e("ROOM", "❌ Failed to connect to Laravel API", t);
             }
         });
     }
@@ -74,6 +79,7 @@ public class SurveyRepository {
                 surveyEntities.add(entity);
             }
             surveyDao.insertAll(surveyEntities);
+            Log.d("ROOM", "✅ Saved " + surveyEntities.size() + " surveys to Room");
         }).start();
     }
 }

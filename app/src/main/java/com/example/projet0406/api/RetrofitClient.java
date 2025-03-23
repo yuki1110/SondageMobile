@@ -1,6 +1,7 @@
 package com.example.projet0406.api;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.example.projet0406.storage.SharedPrefManager;
 
@@ -8,6 +9,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import okhttp3.Request;
 
 public class RetrofitClient {
 
@@ -16,11 +18,24 @@ public class RetrofitClient {
     private static RetrofitClient instance;
     private final Retrofit retrofit;
 
-    private RetrofitClient() {
+    private RetrofitClient(Context context) {
+        // 取出 token
+        String token = SharedPrefManager.getInstance(context).getToken();
+
+        // 日志拦截器（可选）
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
+        // 自定义拦截器，加上 token
         OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(chain -> {
+                    Request original = chain.request();
+                    Request.Builder builder = original.newBuilder()
+                            .header("Authorization", "Bearer " + token)
+                            .header("Accept", "application/json");
+                    Request request = builder.build();
+                    return chain.proceed(request);
+                })
                 .addInterceptor(loggingInterceptor)
                 .build();
 
@@ -31,22 +46,16 @@ public class RetrofitClient {
                 .build();
     }
 
-    public static synchronized RetrofitClient getInstance() {
+    public static synchronized RetrofitClient getInstance(Context context) {
         if (instance == null) {
-            instance = new RetrofitClient();
+            instance = new RetrofitClient(context);
         }
         return instance;
-    }
-
-    public static synchronized RetrofitClient getInstance(Context context) {
-        return getInstance();
     }
 
     public ApiService getApi() {
         return retrofit.create(ApiService.class);
     }
-
-    public ApiService getApiService() {
-        return getApi();
-    }
 }
+
+
